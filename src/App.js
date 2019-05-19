@@ -37,10 +37,13 @@ export default class App extends Component {
     },
     todoList: []
   }
+  componentDidMount = () => {
+    this._loadToDo();
+  }
   render() {
     const { newToDo, todoList } = this.state;
     const TodoList = todoList.map((value, index)=>{
-      return <ToDo key={index} title={value.title} content={value.content} dead={value.date} />;
+      return <ToDo key={index} index={index} title={value.title} content={value.content} date={value.date} _deleteToDo={this._deleteToDo} _editToDo={this._editToDo}/>;
     })
     return (
       <div>
@@ -68,12 +71,45 @@ export default class App extends Component {
         ...todoList,
         newToDo
       ]
-    })
+    });
+    this._saveToDo();
   }
   _loadToDo = () => {
+    const ToDoList = localStorage.getItem("todolist");
+    if(ToDoList !== null){
+      const todoList = JSON.parse(ToDoList);
+      this.setState({
+        todoList
+      })
+    }
+  }
+  _saveToDo = () => {
+    const { todoList } = this.state;
 
+    const todolist = JSON.stringify(todoList);
+    localStorage.setItem("todolist", todolist);
   }
-  _deleteToDo = () => {
+  _deleteToDo = (index) => {
+    const { todoList } = this.state;
     
+    this.setState({
+      todoList: [
+        ...todoList.slice(0, index),
+        ...todoList.slice(index+1)
+      ]
+    })
+    this._saveToDo();
   }
+  _editToDo = (index, editedToDo) => {
+    const { todoList } = this.state;
+    this.setState({
+      todoList: [
+        ...todoList.slice(0, index),
+        editedToDo,
+        ...todoList.slice(index+1)
+      ]
+    })
+    this._saveToDo();
+  }
+
 }
